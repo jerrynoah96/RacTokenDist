@@ -26,7 +26,7 @@ contract RacOsTokenDistributor{
     event Subscribe(address indexed user, uint256 indexed subTpe);
     event Claimed(address indexed user, uint256 amountClaimed);
 
-    IERC20 racInstance = IERC20(0x957816219D4dB5ADE9f9fa693e5c5fd651dDb01A);
+    IERC20 racInstance = IERC20(0x3e3A8476Fb909049a751838552DbfCd21C77D387);
 
     address admin;
     // blackList mapping check
