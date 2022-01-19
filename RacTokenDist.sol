@@ -6,6 +6,7 @@ import "@openzeppelin/contracts/math/SafeMath.sol";
 
 interface IERC20{
     function transfer(address recipient, uint256 amount) external returns (bool);
+    function balanceOf(address account) external view returns (uint256);
 }
 contract RacOsTokenDistributor{
 
@@ -18,10 +19,6 @@ contract RacOsTokenDistributor{
     mapping(address => uint256 ) public subscriptionType;
 
     mapping(uint256 => uint256) public claimableTokensPerSubType;
-
-    mapping(address => uint256) public claimedDateInterval;
-
-    mapping(address => bool) public isWhiteListed;
 
     mapping(address => bool) public hasClaimedForTheMonth;
 
@@ -46,7 +43,6 @@ contract RacOsTokenDistributor{
         for(uint256 i=0; i < _users.length; i++ ){
         require(_subscriptionType[i] == 1 || _subscriptionType[i] == 2 || _subscriptionType[i] == 3, "number passed not within subscription range");
         subscriptionType[_users[i]] =_subscriptionType[i];
-        isWhiteListed[_users[i]] = true;
         hasClaimedForTheMonth[_users[i]] = false;
 
         emit Subscribe(_users[i], _subscriptionType[i]);
@@ -59,19 +55,15 @@ contract RacOsTokenDistributor{
         claimableTokensPerSubType[subType] = _amountClaimable;
     }
 
-    
-    function removeUsers(address[] memory _usersToRemove) public onlyAdmin{
-        for(uint i=0; i<_usersToRemove.length; i++){
-            isWhiteListed[_usersToRemove[i]] = false;
-            subscriptionType[_usersToRemove[i]] = 0;
-        }
-        
-    }
 
+    function withdrawContractBalance(address _address) public onlyAdmin{
+        uint256 bal = racInstance.balanceOf(address(this));
+        racInstance.transfer(_address, bal);
+
+    }
     
 
     function claimRacForTheMonth() public {
-        require(isWhiteListed[msg.sender] == true, "you are currently not part of the whiteListed addresses");
         require(subscriptionType[msg.sender] == 1 || subscriptionType[msg.sender] == 2 || subscriptionType[msg.sender] == 3, "You do not have a valid subscription on this platform");
         require(hasClaimedForTheMonth[msg.sender] == false, "you have claimed already, kindly wait to be whiteListed for another round");
         
