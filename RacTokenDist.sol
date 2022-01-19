@@ -38,6 +38,7 @@ contract RacOsTokenDistributor{
     }
 
     // takes in uint256 as subscription type- this will range only from 1-3
+    // addresses that didnt claim and wants to be removed can also be passed in with 0 as subType
     function batchWhitelist(address[] memory _users, uint256[] memory _subscriptionType) public onlyAdmin {
         require(_users.length == _subscriptionType.length, "users and subscriptionType lenght mismatch");
         for(uint256 i=0; i < _users.length; i++ ){
