@@ -22,6 +22,7 @@ contract RacOsTokenDistributor{
 
     mapping(address => bool) public hasClaimedForTheMonth;
 
+    mapping(address => uint256) public lastTimeWhiteListed;
 
 
     event Subscribe(address indexed user, uint256 indexed subType);
@@ -38,20 +39,20 @@ contract RacOsTokenDistributor{
     }
 
     // takes in uint256 as subscription type- this will range only from 1-3
-    // addresses that didnt claim and wants to be removed can also be passed in with 0 as subType
     function batchWhitelist(address[] memory _users, uint256[] memory _subscriptionType) public onlyAdmin {
         require(_users.length == _subscriptionType.length, "users and subscriptionType lenght mismatch");
         for(uint256 i=0; i < _users.length; i++ ){
         require(_subscriptionType[i] == 1 || _subscriptionType[i] == 2 || _subscriptionType[i] == 3, "number passed not within subscription range");
         subscriptionType[_users[i]] =_subscriptionType[i];
         hasClaimedForTheMonth[_users[i]] = false;
-
+        lastTimeWhiteListed[_users[i]] = block.timestamp;
         emit Subscribe(_users[i], _subscriptionType[i]);
         }
          
     }
 
-    function setClaimableTokenPerSub(uint256 subType, uint256 _amountClaimable) public onlyAdmin{
+    // this function adds new sub type or update existing sub type with the claimable tokens
+    function upClaimableTokenPerSub(uint256 subType, uint256 _amountClaimable) public onlyAdmin{
         
         claimableTokensPerSubType[subType] = _amountClaimable;
     }
@@ -62,11 +63,11 @@ contract RacOsTokenDistributor{
         racInstance.transfer(_address, bal);
 
     }
-    
 
     function claimRacForTheMonth() public {
-        require(subscriptionType[msg.sender] == 1 || subscriptionType[msg.sender] == 2 || subscriptionType[msg.sender] == 3, "You do not have a valid subscription on this platform");
-        require(hasClaimedForTheMonth[msg.sender] == false, "you have claimed already, kindly wait to be whiteListed for another round");
+       require(subscriptionType[msg.sender] == 0, "You do not have a valid subscription on this platform");
+      require(hasClaimedForTheMonth[msg.sender] == false, "you have claimed already, kindly wait to be whiteListed for another round");
+        require(block.timestamp.sub(lastTimeWhiteListed[msg.sender]) > 180, "you don't seem whitelisted to claim for this month");
         
         //check user sub type to determine how much token to claimable
         uint256 userSubType = subscriptionType[msg.sender];
