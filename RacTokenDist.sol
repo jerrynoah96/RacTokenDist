@@ -65,8 +65,8 @@ contract RacOsTokenDistributor{
     }
 
     function claimRacForTheMonth() public {
-       require(subscriptionType[msg.sender] == 0, "You do not have a valid subscription on this platform");
-      require(hasClaimedForTheMonth[msg.sender] == false, "you have claimed already, kindly wait to be whiteListed for another round");
+       require(subscriptionType[msg.sender] != 0, "You do not have a valid subscription on this platform");
+        require(hasClaimedForTheMonth[msg.sender] == false, "you have claimed already, kindly wait to be whiteListed for another round");
         require(block.timestamp.sub(lastTimeWhiteListed[msg.sender]) > 180, "you don't seem whitelisted to claim for this month");
         
         //check user sub type to determine how much token to claimable
